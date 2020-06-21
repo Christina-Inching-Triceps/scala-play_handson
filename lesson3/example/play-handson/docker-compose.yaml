@@ -1,0 +1,36 @@
+version: '3'
+services:
+  play-scala:
+    image: hseeberger/scala-sbt:8u242_1.3.8_2.13.1
+    container_name: play-scala
+    ports:
+      - "9000:9000"
+    volumes:
+      - .:/source
+      - ./.ivy2:/source/.ivy2
+      - ./.sbt:/source/.sbt
+      - ./.cache:/source/.cache
+    working_dir: /source
+    tty: true
+    networks:
+      - app-net
+  db:
+    build: ./docker/db
+    ports:
+      - "3306:3306"
+    container_name: db
+    volumes:
+      # 初期データを投入するSQLが格納されているdir
+      - ./docker/db/init:/docker-entrypoint-initdb.d
+      # データを永続化するときにマウントするdirを指定
+      - ./docker/db/mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: twitter_clone
+      TZ: Asia/Tokyo
+    networks:
+      - app-net
+
+networks:
+  app-net:
+    driver: bridge

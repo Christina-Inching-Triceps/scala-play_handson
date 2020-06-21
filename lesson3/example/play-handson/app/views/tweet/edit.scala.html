@@ -1,0 +1,18 @@
+@import controllers.tweet.TweetFormData
+@* idを引数に追加 *@
+@(id: Long, form: Form[TweetFormData])(implicit messagesProvider: MessagesProvider, requestHeader: RequestHeader)
+
+@main("編集画面") {
+  <h1>編集画面です</h1>
+  @helper.form(action = controllers.tweet.routes.TweetController.update(id)) {
+    @helper.CSRF.formField
+    @helper.textarea(form("content"),
+      'rows -> 7, 'cols -> 40,
+      '_label -> "ツイート" ,'_showConstraints -> false
+    )
+
+    @* hiddenは普通に埋め込み *@
+    <input type="hidden" value="@id" name="id">
+    <input type="submit" value="更新">
+  }
+}

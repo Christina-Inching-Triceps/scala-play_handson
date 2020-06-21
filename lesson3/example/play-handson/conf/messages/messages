@@ -1,0 +1,9 @@
+# https://www.playframework.com/documentation/latest/ScalaI18N
+# 上記リンクに用意されているメッセージ一覧や利用方法が記載されています。
+error.invalid=入力が不正です
+error.required=入力は必須です
+error.maxLength={0}文字以内で入力してください
+
+# 未設定状態では、このkey名が画面に表示されるのでそれをみて設定をすれば良いです。
+constraint.required=*
+constraint.maxLength=最大{0}文字まで

@@ -1,0 +1,45 @@
+@import slick.models.Tweet
+
+@*
+以下はview templeteでの引数を受け取る記載です。
+今回はTweetの一覧を取得するため@(tweets: Seq[Tweet]) となっています。
+*@
+@(tweets: Seq[Tweet])(implicit messagesProvider: MessagesProvider, requestHeader: RequestHeader)
+
+@css = {
+  <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/list.css")">
+}
+
+@script = {
+  <script src="@routes.Assets.versioned("javascripts/list.js")" type="text/javascript"></script>
+}
+
+@main(
+  title  = "一覧画面",
+  script = script,
+  css    = css,
+) {
+  <h1>一覧画面です</h1>
+    @for(tweet <- tweets) {
+      @* cardクリック時の遷移先を保持するためにdata-href属性を作成して設定  *@
+      <div class="card" data-href="@controllers.tweet.routes.TweetController.show(tweet.id.getOrElse(0))">
+        <div class="card_content">
+          @tweet.content
+        </div>
+        <div class="card_footer">
+          <div class="card_footer_item">
+            <a href="@controllers.tweet.routes.TweetController.edit(tweet.id.getOrElse(0))">
+              <i class="far fa-edit"></i>
+            </a>
+          </div>
+          <div class="card_footer_item">
+            @helper.form(action = controllers.tweet.routes.TweetController.delete()) {
+              @helper.CSRF.formField
+              <input type="hidden" value="@tweet.id" name="id">
+              <i class="far fa-trash-alt delete"></i>
+            }
+          </div>
+        </div>
+      </div>
+    }
+}

@@ -1,0 +1,34 @@
+.cache/
+.ivy2/
+.sbt/
+/project/project
+/project/target
+.g8
+
+logs
+*.iml
+target
+.idea
+.idea_modules
+.vscode
+RUNNING_PID
+generated.keystore
+generated.truststore
+*.log
+!.travis-jvmopts
+
+# Scala-IDE specific
+.scala_dependencies
+.classpath
+.project
+.settings/
+.cache-main
+.cache-tests
+.metals
+.bloop
+project/metals.sbt
+
+# docker
+/docker/db/mysql_data
+!/docker/db/mysql_data/.gitkeep
+

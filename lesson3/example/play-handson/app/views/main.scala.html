@@ -1,0 +1,29 @@
+@* js, cssを受け取れるように引数を追加。渡さなくてもいいようにデフォルト値も設定 *@
+@(
+  title:  String,
+  script: Html = Html(""),
+  css:    Html = Html(""),
+)(content: Html)
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>@title</title>
+        @* resetのcssを適用 *@
+        <link href="https://unpkg.com/sanitize.css" rel="stylesheet"/>
+        @* NotoSansとfont-awesomeを追加 *@
+        <link rel="stylesheet" href="https://fonts.googleapis.com/earlyaccess/notosansjapanese.css">
+        <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
+        <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
+        @* 引数の展開 *@
+        @css
+    </head>
+    <body>
+        @content
+
+      <script src="@routes.Assets.versioned("javascripts/main.js")" type="text/javascript"></script>
+      @* 引数の展開 *@
+      @script
+    </body>
+</html>
