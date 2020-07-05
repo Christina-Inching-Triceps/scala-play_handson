@@ -1,0 +1,19 @@
+@import controllers.user.UserForm
+@(form: Form[UserForm])(implicit messagesProvider: MessagesProvider, requestHeader: RequestHeader)
+
+@main("ユーザ登録画面") {
+  <h1>ユーザ登録登録画面</h1>
+  @helper.form(action = controllers.user.routes.UserController.store()) {
+    @helper.CSRF.formField
+    @helper.inputText(form("name"),                 '_label -> "ユーザ名"         ,'_showConstraints -> false)
+    @helper.inputText(form("email"),                '_label -> "メールアドレス"   ,'_showConstraints -> false)
+    @helper.inputPassword(form("password"),         '_label -> "パスワード"       ,'_showConstraints -> false)
+    @helper.inputPassword(form("confirm_password"), '_label -> "パスワード(確認)" ,'_showConstraints -> false)
+    @if(!form.globalErrors.isEmpty) {
+      @for(error <- form.globalErrors){
+        <p>@error.format</p>
+      }
+    }
+    <input type="submit" value="登録">
+  }
+}

@@ -18,8 +18,9 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick"     %% "slick-codegen"         % "3.3.2",
   // 指定すべきバージョンは以下のリンク先
   // https://scala-slick.org/doc/3.3.1/database.html
-  "mysql"                   % "mysql-connector-java"  % "6.0.6",
-  "com.typesafe"            % "config"                % "1.4.0"
+  "mysql"                        % "mysql-connector-java" % "6.0.6",
+  "com.typesafe"                 % "config"               % "1.4.0",
+  "org.springframework.security" % "spring-security-web"  % "5.3.3.RELEASE"
 )
 
 // add code generation task
