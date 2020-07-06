@@ -23,12 +23,12 @@ case class TweetFormData(content: String)
   *   ActionはcontrollerComponents.actionBuilderと同じ
   */
 @Singleton
-class TweetController @Inject()(
+class TweetController @Inject() (
   val controllerComponents: ControllerComponents,
   tweetRepository:          TweetRepository
-)(implicit ec: ExecutionContext)
-extends BaseController
-with I18nSupport {
+)(implicit ec:              ExecutionContext)
+  extends BaseController
+     with I18nSupport {
 
   // Tweet登録用のFormオブジェクト
   val form = Form(
@@ -42,7 +42,7 @@ with I18nSupport {
     * Tweetを一覧表示
     *   Action.asyncとすることでreturnの型としてFuture[Result]を受け取れるように修正
     */
-  def list() =  Action async { implicit request: Request[AnyContent] =>
+  def list() = Action async { implicit request: Request[AnyContent] =>
     // DBから値を取得してreturnするように修正
     for {
       results <- tweetRepository.all()
@@ -76,24 +76,25 @@ with I18nSupport {
   /**
     * 登録処理実を行う
     */
-   def store() = Action async { implicit request: Request[AnyContent] =>
-     // foldでデータ受け取りの成功、失敗を分岐しつつ処理が行える
-     form.bindFromRequest().fold(
-       // 処理が失敗した場合に呼び出される関数
-       (formWithErrors: Form[TweetFormData]) => {
-         Future.successful(BadRequest(views.html.tweet.store(formWithErrors)))
-       },
-       // 処理が成功した場合に呼び出される関数
-       (tweetFormData: TweetFormData) => {
-         for {
-           // データを登録。returnのidは不要なので捨てる
-           _ <- tweetRepository.insert(Tweet(None, tweetFormData.content))
-         } yield {
-           Redirect(routes.TweetController.list())
-         }
-       }
-     )
-   }
+  def store() = Action async { implicit request: Request[AnyContent] =>
+    // foldでデータ受け取りの成功、失敗を分岐しつつ処理が行える
+    form
+      .bindFromRequest().fold(
+        // 処理が失敗した場合に呼び出される関数
+        (formWithErrors: Form[TweetFormData]) => {
+          Future.successful(BadRequest(views.html.tweet.store(formWithErrors)))
+        },
+        // 処理が成功した場合に呼び出される関数
+        (tweetFormData: TweetFormData) => {
+          for {
+            // データを登録。returnのidは不要なので捨てる
+            _ <- tweetRepository.insert(Tweet(None, tweetFormData.content))
+          } yield {
+            Redirect(routes.TweetController.list())
+          }
+        }
+      )
+  }
 
   /**
     * 編集画面を開く
@@ -101,45 +102,49 @@ with I18nSupport {
   def edit(id: Long) = Action async { implicit request: Request[AnyContent] =>
     for {
       tweetOpt <- tweetRepository.findById(id)
-   } yield {
-     tweetOpt match {
-       case Some(tweet) =>
-         Ok(views.html.tweet.edit(
-           // データを識別するためのidを渡す
-           id,
-           // fillでformに値を詰める
-           form.fill(TweetFormData(tweet.content))
-         ))
-       case None        =>
-         NotFound(views.html.error.page404())
-     }
-   }
+    } yield {
+      tweetOpt match {
+        case Some(tweet) =>
+          Ok(
+            views.html.tweet.edit(
+              // データを識別するためのidを渡す
+              id,
+              // fillでformに値を詰める
+              form.fill(TweetFormData(tweet.content))
+            )
+          )
+        case None        =>
+          NotFound(views.html.error.page404())
+      }
+    }
   }
 
   /**
     * 対象のツイートを更新する
     */
   def update(id: Long) = Action async { implicit request: Request[AnyContent] =>
-    form.bindFromRequest().fold(
-      (formWithErrors: Form[TweetFormData]) => {
-        Future.successful(BadRequest(views.html.tweet.edit(id, formWithErrors)))
-      },
-      (data: TweetFormData) => {
-        for {
-          count <- tweetRepository.updateContent(id, data.content)
-        } yield {
-          count match {
-            case 0 => NotFound(views.html.error.page404())
-            case _ => Redirect(routes.TweetController.list())
+    form
+      .bindFromRequest().fold(
+        (formWithErrors: Form[TweetFormData]) => {
+          Future
+            .successful(BadRequest(views.html.tweet.edit(id, formWithErrors)))
+        },
+        (data: TweetFormData) => {
+          for {
+            count <- tweetRepository.updateContent(id, data.content)
+          } yield {
+            count match {
+              case 0 => NotFound(views.html.error.page404())
+              case _ => Redirect(routes.TweetController.list())
+            }
           }
         }
-      }
       )
   }
 
   /**
-   * 対象のデータを削除する
-   */
+    * 対象のデータを削除する
+    */
   def delete() = Action async { implicit request: Request[AnyContent] =>
     // requestから直接値を取得するサンプル
     val idOpt = request.body.asFormUrlEncoded.get("id").headOption
