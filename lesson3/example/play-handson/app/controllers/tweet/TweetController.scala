@@ -46,7 +46,10 @@ class TweetController @Inject() (
     // DBから値を取得してreturnするように修正
     for {
       results <- tweetRepository.all()
+      v <- Future.successful(request.session.get("id"))
     } yield {
+      println("=====================================")
+      println(v.getOrElse("error"))
       Ok(views.html.tweet.list(results))
     }
   }

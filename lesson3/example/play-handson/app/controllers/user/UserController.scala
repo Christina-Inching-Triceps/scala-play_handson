@@ -41,13 +41,11 @@ class UserController @Inject() (
     )
   )
 
-  def register() =
-    Action { implicit request: Request[AnyContent] =>
-      Ok(views.html.user.store(form))
-    }
+  def register() = Action { implicit request: Request[AnyContent] =>
+    Ok(views.html.user.store(form))
+  }
 
-  def store() =
-    Action async { implicit request: Request[AnyContent] =>
+  def store() = Action async { implicit request: Request[AnyContent] =>
       form
         .bindFromRequest().fold(
           (formWithErrors: Form[UserForm]) => {
@@ -57,7 +55,7 @@ class UserController @Inject() (
             val bcryptEncoder   = new BCryptPasswordEncoder()
             val encodedPassowrd = bcryptEncoder.encode(form.password)
             for {
-              _ <- userRepository.insert(
+              id <- userRepository.insert(
                 User(
                   name     = form.name,
                   email    = form.email,
@@ -65,7 +63,8 @@ class UserController @Inject() (
                 )
               )
             } yield {
-              Redirect("/")
+              // UserIdをsessionのkeyとして利用
+              Redirect("/").withSession(("id", id.toString))
             }
           }
         )
