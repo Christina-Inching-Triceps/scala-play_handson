@@ -1,19 +1,5 @@
 version: '3'
 services:
-  play-scala:
-    image: hseeberger/scala-sbt:8u242_1.3.8_2.13.1
-    container_name: play-scala
-    ports:
-      - "9000:9000"
-    volumes:
-      - .:/source
-      - ./.ivy2:/source/.ivy2
-      - ./.sbt:/source/.sbt
-      - ./.cache:/source/.cache
-    working_dir: /source
-    tty: true
-    networks:
-      - app-net
   db:
     build: ./docker/db
     ports:
