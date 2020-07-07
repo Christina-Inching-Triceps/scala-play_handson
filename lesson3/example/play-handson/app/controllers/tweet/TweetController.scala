@@ -12,6 +12,7 @@ import scala.concurrent.ExecutionContext
 import slick.models.Tweet
 import slick.repositories.TweetRepository
 import scala.concurrent.Future
+import mvc.AuthenticatedAction
 
 case class TweetFormData(content: String)
 
@@ -25,6 +26,8 @@ case class TweetFormData(content: String)
 @Singleton
 class TweetController @Inject() (
   val controllerComponents: ControllerComponents,
+  // FIXME: DIで入れるが、Actionを使う時の見た目を通常のActionに合わせるためにUpperCamelで命名
+  Authenticated:            AuthenticatedAction,
   tweetRepository:          TweetRepository
 )(implicit ec:              ExecutionContext)
   extends BaseController
@@ -46,10 +49,7 @@ class TweetController @Inject() (
     // DBから値を取得してreturnするように修正
     for {
       results <- tweetRepository.all()
-      v <- Future.successful(request.session.get("id"))
     } yield {
-      println("=====================================")
-      println(v.getOrElse("error"))
       Ok(views.html.tweet.list(results))
     }
   }
@@ -57,7 +57,7 @@ class TweetController @Inject() (
   /**
     * 対象IDのTweet詳細を表示
     */
-  def show(id: Long) = Action async { implicit request: Request[AnyContent] =>
+  def show(id: Long) = Authenticated async { implicit request: Request[AnyContent] =>
     // idが存在して、値が一致する場合にfindが成立
     for {
       tweetOpt <- tweetRepository.findById(id)

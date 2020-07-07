@@ -13,6 +13,7 @@ import scala.concurrent.Future
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import slick.repositories.UserRepository
 import slick.models.User
+import mvc.AuthenticateHelpers
 
 case class UserForm(
   name:            String,
@@ -27,7 +28,9 @@ class UserController @Inject() (
   userRepository:           UserRepository
 )(implicit ec:              ExecutionContext)
   extends BaseController
-     with I18nSupport {
+     with I18nSupport
+     // 認証後にsessionに持たせるidのKEYをとるためにwith
+     with AuthenticateHelpers {
 
   val form = Form(
     mapping(
@@ -46,27 +49,27 @@ class UserController @Inject() (
   }
 
   def store() = Action async { implicit request: Request[AnyContent] =>
-      form
-        .bindFromRequest().fold(
-          (formWithErrors: Form[UserForm]) => {
-            Future.successful(BadRequest(views.html.user.store(formWithErrors)))
-          },
-          (form: UserForm) => {
-            val bcryptEncoder   = new BCryptPasswordEncoder()
-            val encodedPassowrd = bcryptEncoder.encode(form.password)
-            for {
-              id <- userRepository.insert(
-                User(
-                  name     = form.name,
-                  email    = form.email,
-                  password = encodedPassowrd
-                )
+    form
+      .bindFromRequest().fold(
+        (formWithErrors: Form[UserForm]) => {
+          Future.successful(BadRequest(views.html.user.store(formWithErrors)))
+        },
+        (form: UserForm) => {
+          val bcryptEncoder   = new BCryptPasswordEncoder()
+          val encodedPassowrd = bcryptEncoder.encode(form.password)
+          for {
+            id <- userRepository.insert(
+              User(
+                name     = form.name,
+                email    = form.email,
+                password = encodedPassowrd
               )
-            } yield {
-              // UserIdをsessionのkeyとして利用
-              Redirect("/").withSession(("id", id.toString))
-            }
+            )
+          } yield {
+            // UserIdをsessionのkeyとして利用
+            Redirect("/").withSession((SESSION_ID, id.toString))
           }
-        )
-    }
+        }
+      )
+  }
 }
