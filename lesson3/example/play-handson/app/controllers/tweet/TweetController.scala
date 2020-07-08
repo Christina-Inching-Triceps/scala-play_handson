@@ -13,6 +13,9 @@ import slick.models.Tweet
 import slick.repositories.TweetRepository
 import scala.concurrent.Future
 import mvc.AuthenticatedAction
+import services.AuthenticateService
+import mvc.AuthenticateActionHelpers
+import mvc.UserRequest
 
 case class TweetFormData(content: String)
 
@@ -27,11 +30,13 @@ case class TweetFormData(content: String)
 class TweetController @Inject() (
   val controllerComponents: ControllerComponents,
   // FIXME: DIで入れるが、Actionを使う時の見た目を通常のActionに合わせるためにUpperCamelで命名
-  Authenticated:            AuthenticatedAction,
-  tweetRepository:          TweetRepository
-)(implicit ec:              ExecutionContext)
+  // Authenticated:   AuthenticatedAction,
+  tweetRepository: TweetRepository,
+  authService:     AuthenticateService
+)(implicit ec:     ExecutionContext)
   extends BaseController
-     with I18nSupport {
+     with I18nSupport
+     with AuthenticateActionHelpers {
 
   // Tweet登録用のFormオブジェクト
   val form = Form(
@@ -57,7 +62,7 @@ class TweetController @Inject() (
   /**
     * 対象IDのTweet詳細を表示
     */
-  def show(id: Long) = Authenticated async { implicit request: Request[AnyContent] =>
+  def show(id: Long) = Authenticated(authService.authenticate) async { implicit request: UserRequest[AnyContent] =>
     // idが存在して、値が一致する場合にfindが成立
     for {
       tweetOpt <- tweetRepository.findById(id)

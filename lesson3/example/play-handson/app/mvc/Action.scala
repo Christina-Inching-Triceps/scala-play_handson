@@ -12,6 +12,8 @@ import controllers.routes
 import play.api.mvc.Results
 import scala.util.Try
 import play.api.mvc.PlayBodyParsers
+import play.api.mvc.RequestHeader
+import slick.models.User
 
 
 // 認証処理サンプル1: 実装としてはシンプル。ユーザ検証までしてないので、ちょっと不安が残る
@@ -39,6 +41,33 @@ class AuthenticatedAction @Inject()(
   }
 }
 
-// jwtなので認証自体はjwt検証のみで良いはず
-// User情報が必要な場合にはRefinerを利用して拡張する
-// ただし厳密にはDBまで検証した方が正しい
+// 認証処理サンプル2: ActionBuilderはDIせずにHelpers経由で呼び出し
+// 認証ロジックのService(Module)をDIで取得して引き渡すようなやつ
+// AuthenticateService, AuthenticateActionHelpersを追加
+trait AuthenticateActionBuilder extends ActionBuilder[UserRequest, AnyContent]
+object AuthenticateActionBuilder {
+  def apply(authenticate: RequestHeader => Option[User], parser: BodyParser[AnyContent])(implicit ec: ExecutionContext) = {
+    new AuthenticateActionBuilderImpl(authenticate, parser)
+  }
+}
+
+class AuthenticateActionBuilderImpl (
+  val authenticate: RequestHeader => Option[User],
+  val parser:       BodyParser[AnyContent]
+)(implicit ec: ExecutionContext)
+  extends AuthenticateActionBuilder
+     with Results {
+
+  override def executionContext: ExecutionContext = ec
+
+  def invokeBlock[A](
+    request: Request[A],
+    block:   UserRequest[A] => Future[Result]
+  ): Future[Result] = authenticate(request) match {
+    case Some(user) =>
+      block(new UserRequest(user, request))
+    case None      =>
+      Future.successful(Redirect("/"))
+  }
+}
+
