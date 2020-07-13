@@ -17,17 +17,14 @@ class AuthenticateService @Inject() (
 ) extends AuthenticateHelpers {
 
   // FIXME: 最終的にはもうちょっといい感じにリファクタリングしたい
-  def authenticate(request: RequestHeader)(implicit ec: ExecutionContext): Option[User] = {
-    Await.result(
-      request.session.get(SESSION_ID) match {
-        case Some(sid) if Try(sid.toLong).isSuccess =>
-          for {
-            userOpt <- userRepository.findById(sid.toLong)
-          } yield userOpt
-        case None      =>
-          Future.successful(None)
-      },
-      Duration.Inf
-    )
+  def authenticate(request: RequestHeader)(implicit ec: ExecutionContext): Future[Option[User]] = {
+    request.session.get(SESSION_ID) match {
+      case Some(sid) if Try(sid.toLong).isSuccess =>
+        for {
+          userOpt <- userRepository.findById(sid.toLong)
+        } yield userOpt
+      case None      =>
+        Future.successful(None)
+    }
   }
 }

@@ -46,13 +46,13 @@ class AuthenticatedAction @Inject()(
 // AuthenticateService, AuthenticateActionHelpersを追加
 trait AuthenticateActionBuilder extends ActionBuilder[UserRequest, AnyContent]
 object AuthenticateActionBuilder {
-  def apply(authenticate: RequestHeader => Option[User], parser: BodyParser[AnyContent])(implicit ec: ExecutionContext) = {
+  def apply(authenticate: RequestHeader => Future[Option[User]], parser: BodyParser[AnyContent])(implicit ec: ExecutionContext) = {
     new AuthenticateActionBuilderImpl(authenticate, parser)
   }
 }
 
 class AuthenticateActionBuilderImpl (
-  val authenticate: RequestHeader => Option[User],
+  val authenticate: RequestHeader => Future[Option[User]],
   val parser:       BodyParser[AnyContent]
 )(implicit ec: ExecutionContext)
   extends AuthenticateActionBuilder
@@ -63,11 +63,13 @@ class AuthenticateActionBuilderImpl (
   def invokeBlock[A](
     request: Request[A],
     block:   UserRequest[A] => Future[Result]
-  ): Future[Result] = authenticate(request) match {
-    case Some(user) =>
-      block(new UserRequest(user, request))
-    case None      =>
-      Future.successful(Redirect("/"))
+  ): Future[Result] = authenticate(request) flatMap { userOpt =>
+    userOpt match {
+      case Some(user) =>
+        block(new UserRequest(user, request))
+      case None      =>
+        Future.successful(Redirect("/"))
+    }
   }
 }
 
