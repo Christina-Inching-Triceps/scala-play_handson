@@ -15,7 +15,7 @@ trait AuthenticateHelpers {
 trait AuthenticateActionHelpers {
   self: BaseControllerHelpers =>
 
-  def Authenticated(authenticate: RequestHeader => Future[Option[User]])(implicit ec: ExecutionContext) = {
-    AuthenticateActionBuilder(authenticate, parse.default)
+  def Authenticated(authenticate: RequestHeader => Future[Option[User]]) = {
+    AuthenticateActionBuilder(authenticate, parse.default)(defaultExecutionContext)
   }
 }
