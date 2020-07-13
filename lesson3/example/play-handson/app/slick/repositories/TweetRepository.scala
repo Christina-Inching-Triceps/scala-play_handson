@@ -35,6 +35,24 @@ extends HasDatabaseConfigProvider[JdbcProfile] {
   )
 
   /**
+   * idとuserを指定してTweetを取得
+   */
+  def findByIdAndUser(id: Long, userId: Long): Future[Option[Tweet]] = db.run(
+    query
+      .filter(x => x.id     === id)
+      .filter(x => x.userId === userId)
+      .result.headOption
+  )
+
+
+  /**
+   * userIdを指定して紐づくツイート一覧を取得
+   */
+  def selectByUser(userId: Long): Future[Seq[Tweet]] = db.run {
+    query.filter(x => x.userId  === userId).result
+  }
+
+  /**
    * tweetを1件登録する
    */
   def insert(tweet: Tweet): Future[Long]= db.run(
@@ -77,13 +95,25 @@ extends HasDatabaseConfigProvider[JdbcProfile] {
     query.filter(_.id === idOpt).delete
   )
 
+  /**
+   * 対象のデータを削除する
+   */
+  def delete(idOpt: Option[Long], userId: Long): Future[Int] = db.run {
+    query
+      .filter(_.id     === idOpt)
+      .filter(_.userId === userId)
+      .delete
+  }
+
+
 
   // ########## [Table Mapping] ##########
   private class TweetTable(_tableTag: Tag) extends Table[Tweet](_tableTag, Some("twitter_clone"), "tweet") {
 
     // Tableとのカラムマッピング
-    val id:        Rep[Long]          = column[Long]("id", O.AutoInc, O.PrimaryKey)
-    val content:   Rep[String]        = column[String]("content", O.Length(120,varying=true))
+    val id:        Rep[Long]          = column[Long]         ("id",      O.AutoInc, O.PrimaryKey)
+    val userId:    Rep[Long]          = column[Long]         ("user_id")
+    val content:   Rep[String]        = column[String]       ("content", O.Length(120,varying=true))
     val postedAt:  Rep[LocalDateTime] = column[LocalDateTime]("posted_at")
     val createdAt: Rep[LocalDateTime] = column[LocalDateTime]("created_at")
     val updatedAt: Rep[LocalDateTime] = column[LocalDateTime]("updated_at")
@@ -91,16 +121,17 @@ extends HasDatabaseConfigProvider[JdbcProfile] {
     // Plain SQLでデータ取得を行う用のマッピング
     implicit def GetResultTweet(implicit e0: GetResult[Long], e1: GetResult[String], e2: GetResult[LocalDateTime]): GetResult[Tweet] = GetResult{
       prs => import prs._
-      Tweet.tupled((Some(<<[Long]), <<[String], <<[LocalDateTime], <<[LocalDateTime], <<[LocalDateTime]))
+      Tweet.tupled((Some(<<[Long]), <<[Long], <<[String], <<[LocalDateTime], <<[LocalDateTime], <<[LocalDateTime]))
     }
 
     // model -> db用タプル, dbからのデータ -> modelの変換を記述する処理
     // O.PrimaryKeyはColumnOptionTypeとなるためid.?でidをOptionとして取り扱い可能
-    def * = (id.?, content, postedAt, createdAt, updatedAt) <> (Tweet.tupled, Tweet.unapply)
+    def * = (id.?, userId, content, postedAt, createdAt, updatedAt) <> (Tweet.tupled, Tweet.unapply)
 
     // Maps whole row to an option. Useful for outer joins.
     def ? = ((
       Rep.Some(id),
+      Rep.Some(userId),
       Rep.Some(content),
       Rep.Some(postedAt),
       Rep.Some(createdAt),
@@ -114,7 +145,8 @@ extends HasDatabaseConfigProvider[JdbcProfile] {
             _2.get,
             _3.get,
             _4.get,
-            _5.get
+            _5.get,
+            _6.get
           ))
     )},
     (_:Any) =>

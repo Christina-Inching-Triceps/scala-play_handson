@@ -26,7 +26,8 @@ class LoginController @Inject() (
   userRepository:           UserRepository
 )(implicit ec:              ExecutionContext)
   extends BaseController
-     with I18nSupport {
+     with I18nSupport
+     with AuthenticateHelpers {
 
   val loginForm = Form(
     mapping(
@@ -52,7 +53,8 @@ class LoginController @Inject() (
         } yield {
           userOpt match {
             case Some(user) if bcryptEncoder.matches(form.password, user.password) =>
-              Redirect("/tweet/list")
+              Redirect("/tweet/list").withSession((SESSION_ID, user.id.get.toString))
+
             case _ =>
               BadRequest(
                 views.html.login(

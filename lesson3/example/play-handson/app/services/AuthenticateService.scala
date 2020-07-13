@@ -16,7 +16,6 @@ class AuthenticateService @Inject() (
   userRepository: UserRepository
 ) extends AuthenticateHelpers {
 
-  // FIXME: 最終的にはもうちょっといい感じにリファクタリングしたい
   def authenticate(request: RequestHeader)(implicit ec: ExecutionContext): Future[Option[User]] = {
     request.session.get(SESSION_ID) match {
       case Some(sid) if Try(sid.toLong).isSuccess =>

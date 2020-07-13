@@ -14,6 +14,7 @@ import scala.util.Try
 import play.api.mvc.PlayBodyParsers
 import play.api.mvc.RequestHeader
 import slick.models.User
+import play.api.mvc.Action
 
 
 // 認証処理サンプル1: 実装としてはシンプル。ユーザ検証までしてないので、ちょっと不安が残る
@@ -65,11 +66,12 @@ class AuthenticateActionBuilderImpl (
     request: Request[A],
     block:   UserRequest[A] => Future[Result]
   ): Future[Result] = authenticate(request) flatMap { userOpt =>
+    println(userOpt)
     userOpt match {
       case Some(user) =>
         block(new UserRequest(user, request))
       case None      =>
-        Future.successful(Redirect("/"))
+        Future.successful(Redirect("/login"))
     }
   }
 }

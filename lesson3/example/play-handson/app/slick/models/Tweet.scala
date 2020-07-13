@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 // 参考: https://docs.scala-lang.org/ja/tour/case-classes.html
 case class Tweet(
   id:        Option[Long] = None,
+  userId:    Long,
   content:   String,
   postedAt:  LocalDateTime = LocalDateTime.now,
   createdAt: LocalDateTime = LocalDateTime.now,
