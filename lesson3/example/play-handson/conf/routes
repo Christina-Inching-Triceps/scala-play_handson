@@ -1,5 +1,10 @@
 GET     /                           controllers.HomeController.index
 
+# Login, Logout
+GET     /login                      controllers.LoginController.index
+POST    /login                      controllers.LoginController.login
+GET     /logout                     controllers.LogoutController.logout
+
 # tweet
 GET     /tweet/list                 controllers.tweet.TweetController.list
 GET     /tweet/$id<[0-9]+>          controllers.tweet.TweetController.show(id: Long)

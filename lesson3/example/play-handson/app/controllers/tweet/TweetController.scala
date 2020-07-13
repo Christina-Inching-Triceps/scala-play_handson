@@ -62,7 +62,7 @@ class TweetController @Inject() (
   /**
     * 対象IDのTweet詳細を表示
     */
-  def show(id: Long) = Authenticated(authService.authenticate) async { implicit request: UserRequest[AnyContent] =>
+  def show(id: Long) = Action async { implicit request: Request[AnyContent] =>
     // idが存在して、値が一致する場合にfindが成立
     for {
       tweetOpt <- tweetRepository.findById(id)

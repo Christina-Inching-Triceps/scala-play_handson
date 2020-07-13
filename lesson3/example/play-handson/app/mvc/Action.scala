@@ -46,9 +46,10 @@ class AuthenticatedAction @Inject()(
 // AuthenticateService, AuthenticateActionHelpersを追加
 trait AuthenticateActionBuilder extends ActionBuilder[UserRequest, AnyContent]
 object AuthenticateActionBuilder {
-  def apply(authenticate: RequestHeader => Future[Option[User]], parser: BodyParser[AnyContent])(implicit ec: ExecutionContext) = {
-    new AuthenticateActionBuilderImpl(authenticate, parser)
-  }
+  def apply(
+    authenticate: RequestHeader => Future[Option[User]],
+    parser: BodyParser[AnyContent])(implicit ec: ExecutionContext
+  ) = new AuthenticateActionBuilderImpl(authenticate, parser)
 }
 
 class AuthenticateActionBuilderImpl (

@@ -35,6 +35,13 @@ extends HasDatabaseConfigProvider[JdbcProfile] {
   )
 
   /**
+   * emailを指定してユーザを取得
+   */
+  def findByEmail(email: String): Future[Option[User]] = db.run {
+    query.filter(x => x.email  === email).result.headOption
+  }
+
+  /**
    * userを1件登録する
    */
   def insert(user: User): Future[Long]= db.run(
