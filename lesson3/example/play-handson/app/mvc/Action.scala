@@ -22,7 +22,7 @@ import play.api.mvc.Action
 class AuthenticatedAction @Inject()(
   playBodyParser:  PlayBodyParsers //DIするのでBodyParserではなくPlayBodyParsers
 )(implicit ec: ExecutionContext)
-  extends ActionBuilder[AuthendicatedRequest, AnyContent]
+  extends ActionBuilder[AuthenticatedRequest, AnyContent]
      with AuthenticateHelpers
      with Results {
 
@@ -31,11 +31,11 @@ class AuthenticatedAction @Inject()(
 
   def invokeBlock[A](
     request: Request[A],
-    block:   AuthendicatedRequest[A] => Future[Result]
+    block:   AuthenticatedRequest[A] => Future[Result]
   ): Future[Result] = {
     request.session.get(SESSION_ID) match {
       case Some(sid) if Try(sid.toLong).isSuccess =>
-        block(new AuthendicatedRequest(sid.toLong, request))
+        block(new AuthenticatedRequest(sid.toLong, request))
       case None      =>
         Future.successful(Redirect("/"))
     }
@@ -66,7 +66,6 @@ class AuthenticateActionBuilderImpl (
     request: Request[A],
     block:   UserRequest[A] => Future[Result]
   ): Future[Result] = authenticate(request) flatMap { userOpt =>
-    println(userOpt)
     userOpt match {
       case Some(user) =>
         block(new UserRequest(user, request))

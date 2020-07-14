@@ -3,7 +3,8 @@
   title:  String,
   script: Html = Html(""),
   css:    Html = Html(""),
-)(content: Html)
+)(content: Html)(implicit messagesProvider: MessagesProvider, requestHeader: RequestHeader)
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -20,7 +21,9 @@
         @css
     </head>
     <body>
-        @content
+      @header(title)
+
+      @content
 
       <script src="@routes.Assets.versioned("javascripts/main.js")" type="text/javascript"></script>
       @* 引数の展開 *@

@@ -16,6 +16,7 @@ class AuthenticateService @Inject() (
   userRepository: UserRepository
 ) extends AuthenticateHelpers {
 
+  // FIXME: methodではなくクラス側にexecutionContextを持たせた方が良いかも
   def authenticate(request: RequestHeader)(implicit ec: ExecutionContext): Future[Option[User]] = {
     request.session.get(SESSION_ID) match {
       case Some(sid) if Try(sid.toLong).isSuccess =>

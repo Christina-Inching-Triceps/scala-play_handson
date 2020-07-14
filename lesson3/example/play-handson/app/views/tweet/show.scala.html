@@ -1,8 +1,7 @@
 @import slick.models.Tweet
-@(tweet: Tweet)
+@(tweet: Tweet)(implicit messagesProvider: MessagesProvider, requestHeader: RequestHeader)
 
 @main("詳細画面") {
-  <h1>詳細画面です</h1>
   <div id="detail">
     <div>id: @tweet.id</div>
     <div>content: @tweet.content</div>

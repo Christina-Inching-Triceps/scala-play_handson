@@ -1,0 +1,11 @@
+@import mvc.UserRequest
+
+@(title: String)(implicit messagesProvider: MessagesProvider, requestHeader: RequestHeader)
+
+<header>
+  <h1>@title</h1>
+  @* FIXME: 無理やりすぎる。 *@
+  @if(requestHeader.isInstanceOf[UserRequest[AnyContent]]) {
+  <p>ログアウト</p>
+  }
+</header>

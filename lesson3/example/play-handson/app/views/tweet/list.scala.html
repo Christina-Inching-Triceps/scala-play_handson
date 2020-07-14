@@ -19,27 +19,26 @@
   script = script,
   css    = css,
 ) {
-  <h1>一覧画面です</h1>
-    @for(tweet <- tweets) {
-      @* cardクリック時の遷移先を保持するためにdata-href属性を作成して設定  *@
-      <div class="card" data-href="@controllers.tweet.routes.TweetController.show(tweet.id.getOrElse(0))">
-        <div class="card_content">
-          @tweet.content
+  @for(tweet <- tweets) {
+    @* cardクリック時の遷移先を保持するためにdata-href属性を作成して設定  *@
+    <div class="card" data-href="@controllers.tweet.routes.TweetController.show(tweet.id.getOrElse(0))">
+      <div class="card_content">
+        @tweet.content
+      </div>
+      <div class="card_footer">
+        <div class="card_footer_item">
+          <a href="@controllers.tweet.routes.TweetController.edit(tweet.id.getOrElse(0))">
+            <i class="far fa-edit"></i>
+          </a>
         </div>
-        <div class="card_footer">
-          <div class="card_footer_item">
-            <a href="@controllers.tweet.routes.TweetController.edit(tweet.id.getOrElse(0))">
-              <i class="far fa-edit"></i>
-            </a>
-          </div>
-          <div class="card_footer_item">
-            @helper.form(action = controllers.tweet.routes.TweetController.delete()) {
-              @helper.CSRF.formField
-              <input type="hidden" value="@tweet.id" name="id">
-              <i class="far fa-trash-alt delete"></i>
-            }
-          </div>
+        <div class="card_footer_item">
+          @helper.form(action = controllers.tweet.routes.TweetController.delete()) {
+            @helper.CSRF.formField
+            <input type="hidden" value="@tweet.id" name="id">
+            <i class="far fa-trash-alt delete"></i>
+          }
         </div>
       </div>
-    }
+    </div>
+  }
 }

@@ -5,6 +5,8 @@ import slick.models.User
 import scala.concurrent.ExecutionContext
 import play.api.mvc.BaseControllerHelpers
 import scala.concurrent.Future
+import play.api.i18n.Messages
+import play.api.i18n.I18nSupport
 
 trait AuthenticateHelpers {
   val SESSION_ID = "sid"
