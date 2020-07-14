@@ -78,8 +78,7 @@ class TweetController @Inject() (
   /**
     * 登録画面の表示用
     */
-  // FIXME: applyなしで呼べるようにしたい
-  def register() = Authenticated(authService.authenticate) apply { implicit request: UserRequest[AnyContent] =>
+  def register() = Authenticated(authService.authenticate) { implicit request: UserRequest[AnyContent] =>
     Ok(views.html.tweet.store(form))
   }
 
