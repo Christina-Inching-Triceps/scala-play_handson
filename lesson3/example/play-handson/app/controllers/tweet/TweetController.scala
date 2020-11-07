@@ -15,6 +15,7 @@ import scala.concurrent.Future
 import services.AuthenticateService
 import mvc.AuthenticateActionHelpers
 import mvc.AuthedRequest
+import model.view.TweetListViewModel
 
 case class TweetFormData(content: String)
 
@@ -53,9 +54,13 @@ class TweetController @Inject() (
     // DBから値を取得してreturnするように修正
     for {
       // FIXME: EntityModelは認証埋め込み後に修正する
-      results <- tweetRepository.selectByUser(request.user.id.get)
+      tweets <- tweetRepository.selectByUser(request.user.id.get)
     } yield {
-      Ok(views.html.tweet.list(results))
+      val viewModel = TweetListViewModel.from(
+        userOpt = Some(request.user),
+        tweets  = tweets
+      )
+      Ok(views.html.tweet.list(viewModel))
     }
   }
 

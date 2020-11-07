@@ -1,0 +1,45 @@
+@import model.view.HeaderViewModel
+
+@(vm: HeaderViewModel)(implicit messagesProvider: MessagesProvider, requestHeader: RequestHeader)
+
+@loggedInHeader = @{
+<header>Logged In</header>
+}
+
+@commonHeader   = @{
+<header>Not Logged In</header>
+}
+
+@vm.loginUser match {
+  case Some(user) => {
+    @loggedInHeader
+  }
+  case None       => {
+    @commonHeader
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

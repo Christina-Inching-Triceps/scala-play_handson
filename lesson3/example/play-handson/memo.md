@@ -7,3 +7,8 @@
 - helpersでcontextごとにfunctionをつけるでも良い
 
 このレベルで変更できればおそらく実運用で困らない
+
+## ファイル構成
+
+実際のTwitterを踏襲しようとすると現状の作りではカオスになる。
+特に/homeと/{username}の区別を考えると、TweetControllerなどは命名が広範囲すぎる
