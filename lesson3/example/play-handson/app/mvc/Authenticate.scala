@@ -11,9 +11,8 @@ trait AuthenticateHelpers {
   val SESSION_ID = "sid"
 }
 
-// parserなど利用したいことと、Controllerでしか使わないことから
-// BaseControllerHelpersと混ぜる
 trait AuthenticateActionHelpers {
+  // parserなどのデータを利用せず、Controllerでしか使わないことからBaseControllerHelpersと混ぜる
   self: BaseControllerHelpers =>
 
   def AuthNAction(authenticate: RequestHeader => Future[Either[Result, User]]) = {

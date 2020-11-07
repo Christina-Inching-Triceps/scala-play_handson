@@ -10,7 +10,7 @@ class AuthedRequest[A](
   request:  Request[A]
 ) extends WrappedRequest[A](request)
 
-
+// ログイン成功、失敗どちらでも良い場合に利用するリクエスト
 class AuthedOrNotRequest[A](
   val user: Option[User],
   request:  Request[A]
