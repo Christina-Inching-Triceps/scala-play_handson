@@ -12,10 +12,9 @@ import scala.concurrent.ExecutionContext
 import slick.models.Tweet
 import slick.repositories.TweetRepository
 import scala.concurrent.Future
-import mvc.AuthenticatedAction
 import services.AuthenticateService
 import mvc.AuthenticateActionHelpers
-import mvc.UserRequest
+import mvc.AuthedRequest
 
 case class TweetFormData(content: String)
 
@@ -30,7 +29,7 @@ case class TweetFormData(content: String)
 class TweetController @Inject() (
   val controllerComponents: ControllerComponents,
   // FIXME: DIで入れるが、Actionを使う時の見た目を通常のActionに合わせるためにUpperCamelで命名
-  // Authenticated:   AuthenticatedAction,
+  // AuthNAction:   AuthNActionAction,
   tweetRepository: TweetRepository,
   authService:     AuthenticateService
 )(implicit ec:     ExecutionContext)
@@ -50,7 +49,7 @@ class TweetController @Inject() (
     * Tweetを一覧表示
     *   Action.asyncとすることでreturnの型としてFuture[Result]を受け取れるように修正
     */
-  def list() = Authenticated(authService.authenticate) async { implicit request: UserRequest[AnyContent] =>
+  def list() = AuthNAction(authService.authenticate) async { implicit request: AuthedRequest[AnyContent] =>
     // DBから値を取得してreturnするように修正
     for {
       // FIXME: EntityModelは認証埋め込み後に修正する
@@ -63,7 +62,7 @@ class TweetController @Inject() (
   /**
     * 対象IDのTweet詳細を表示
     */
-  def show(id: Long) = Authenticated(authService.authenticate) async { implicit request: UserRequest[AnyContent] =>
+  def show(id: Long) = AuthNAction(authService.authenticate) async { implicit request: AuthedRequest[AnyContent] =>
     // idが存在して、値が一致する場合にfindが成立
     for {
       tweetOpt <- tweetRepository.findByIdAndUser(id, request.user.id.get)
@@ -78,14 +77,14 @@ class TweetController @Inject() (
   /**
     * 登録画面の表示用
     */
-  def register() = Authenticated(authService.authenticate) { implicit request: UserRequest[AnyContent] =>
+  def register() = AuthNAction(authService.authenticate) { implicit request: AuthedRequest[AnyContent] =>
     Ok(views.html.tweet.store(form))
   }
 
   /**
     * 登録処理実を行う
     */
-  def store() = Authenticated(authService.authenticate) async { implicit request: UserRequest[AnyContent] =>
+  def store() = AuthNAction(authService.authenticate) async { implicit request: AuthedRequest[AnyContent] =>
     // foldでデータ受け取りの成功、失敗を分岐しつつ処理が行える
     form
       .bindFromRequest().fold(
@@ -112,7 +111,7 @@ class TweetController @Inject() (
   /**
     * 編集画面を開く
     */
-  def edit(id: Long) = Authenticated(authService.authenticate) async { implicit request: UserRequest[AnyContent] =>
+  def edit(id: Long) = AuthNAction(authService.authenticate) async { implicit request: AuthedRequest[AnyContent] =>
     for {
       tweetOpt <- tweetRepository.findByIdAndUser(id, request.user.id.get)
     } yield {
@@ -135,7 +134,7 @@ class TweetController @Inject() (
   /**
     * 対象のツイートを更新する
     */
-  def update(id: Long) = Authenticated(authService.authenticate) async { implicit request: UserRequest[AnyContent] =>
+  def update(id: Long) = AuthNAction(authService.authenticate) async { implicit request: AuthedRequest[AnyContent] =>
     form
       .bindFromRequest().fold(
         (formWithErrors: Form[TweetFormData]) => {
@@ -158,7 +157,7 @@ class TweetController @Inject() (
   /**
     * 対象のデータを削除する
     */
-  def delete() = Authenticated(authService.authenticate) async { implicit request: UserRequest[AnyContent] =>
+  def delete() = AuthNAction(authService.authenticate) async { implicit request: AuthedRequest[AnyContent] =>
     // requestから直接値を取得するサンプル
     val idOpt = request.body.asFormUrlEncoded.get("id").headOption
     for {

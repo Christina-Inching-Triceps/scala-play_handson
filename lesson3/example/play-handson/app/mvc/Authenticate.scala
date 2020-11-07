@@ -5,6 +5,7 @@ import slick.models.User
 import scala.concurrent.ExecutionContext
 import play.api.mvc.BaseControllerHelpers
 import scala.concurrent.Future
+import play.api.mvc.Result
 
 trait AuthenticateHelpers {
   val SESSION_ID = "sid"
@@ -15,7 +16,11 @@ trait AuthenticateHelpers {
 trait AuthenticateActionHelpers {
   self: BaseControllerHelpers =>
 
-  def Authenticated(authenticate: RequestHeader => Future[Option[User]]) = {
+  def AuthNAction(authenticate: RequestHeader => Future[Either[Result, User]]) = {
     AuthenticateActionBuilder(authenticate, parse.default)(defaultExecutionContext)
+  }
+
+  def AuthNOrNotAction(authenticateOrNot: RequestHeader => Future[Option[User]]) = {
+    AuthenticateOrNotActionBuilder(authenticateOrNot, parse.default)(defaultExecutionContext)
   }
 }

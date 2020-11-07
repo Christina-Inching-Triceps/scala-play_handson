@@ -20,7 +20,7 @@ import play.api.mvc.Action
 // 認証処理サンプル1: 実装としてはシンプル。ユーザ検証までしてないので、ちょっと不安が残る
 @Singleton
 class AuthenticatedAction @Inject()(
-  playBodyParser:  PlayBodyParsers //DIするのでBodyParserではなくPlayBodyParsers
+  playBodyParser:  PlayBodyParsers //DIするので抽象型のBodyParserではなく実体のPlayBodyParsers
 )(implicit ec: ExecutionContext)
   extends ActionBuilder[AuthendicatedRequest, AnyContent]
      with AuthenticateHelpers
@@ -42,19 +42,23 @@ class AuthenticatedAction @Inject()(
   }
 }
 
+// =============================== //
+//          Authenticate           //
+// =============================== //
+//
 // 認証処理サンプル2: ActionBuilderはDIせずにHelpers経由で呼び出し
 // 認証ロジックのService(Module)をDIで取得して引き渡すようなやつ
 // AuthenticateService, AuthenticateActionHelpersを追加
-trait AuthenticateActionBuilder extends ActionBuilder[UserRequest, AnyContent]
+trait  AuthenticateActionBuilder extends ActionBuilder[AuthedRequest, AnyContent]
 object AuthenticateActionBuilder {
   def apply(
-    authenticate: RequestHeader => Future[Option[User]],
-    parser: BodyParser[AnyContent])(implicit ec: ExecutionContext
-  ) = new AuthenticateActionBuilderImpl(authenticate, parser)
+    authenticate: RequestHeader => Future[Either[Result, User]],
+    parser:       BodyParser[AnyContent]
+  )(implicit ec: ExecutionContext) = new AuthenticateActionBuilderImpl(authenticate, parser)
 }
 
 class AuthenticateActionBuilderImpl (
-  val authenticate: RequestHeader => Future[Option[User]],
+  val authenticate: RequestHeader => Future[Either[Result, User]],
   val parser:       BodyParser[AnyContent]
 )(implicit ec: ExecutionContext)
   extends AuthenticateActionBuilder
@@ -64,15 +68,44 @@ class AuthenticateActionBuilderImpl (
 
   def invokeBlock[A](
     request: Request[A],
-    block:   UserRequest[A] => Future[Result]
-  ): Future[Result] = authenticate(request) flatMap { userOpt =>
-    println(userOpt)
-    userOpt match {
-      case Some(user) =>
-        block(new UserRequest(user, request))
-      case None      =>
-        Future.successful(Redirect("/login"))
+    block:   AuthedRequest[A] => Future[Result]
+  ): Future[Result] = authenticate(request) flatMap {
+    _ match {
+      case Right(user) =>
+        block(new AuthedRequest(user, request))
+      case Left(result)=> Future.successful(result)
     }
   }
 }
+
+// =============================== //
+//        AuthenticateOrNot        //
+// =============================== //
+
+trait  AuthenticateOrNotActionBuilder extends ActionBuilder[AuthedOrNotRequest, AnyContent]
+object AuthenticateOrNotActionBuilder {
+  def apply(
+    authenticateOrNot: RequestHeader => Future[Option[User]],
+    parser:            BodyParser[AnyContent]
+  )(implicit ec: ExecutionContext) = new AuthenticateOrNotActionBuilderImpl(authenticateOrNot, parser)
+}
+
+class AuthenticateOrNotActionBuilderImpl (
+  val authenticateOrNot: RequestHeader => Future[Option[User]],
+  val parser:       BodyParser[AnyContent]
+)(implicit ec: ExecutionContext)
+  extends AuthenticateOrNotActionBuilder
+     with Results {
+
+  override def executionContext: ExecutionContext = ec
+
+  def invokeBlock[A](
+    request: Request[A],
+    block:   AuthedOrNotRequest[A] => Future[Result]
+  ): Future[Result] = authenticateOrNot(request) flatMap { userOpt =>
+    block(new AuthedOrNotRequest(userOpt, request))
+  }
+}
+
+
 

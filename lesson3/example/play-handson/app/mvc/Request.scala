@@ -4,9 +4,15 @@ import slick.models.User
 import play.api.mvc.WrappedRequest
 import play.api.mvc.Request
 
-// 認証タイミングでユーザ情報取得までするパターンのリクエスト
-class UserRequest[A](
+// ログイン認証済のリクエスト
+class AuthedRequest[A](
   val user: User,
+  request:  Request[A]
+) extends WrappedRequest[A](request)
+
+
+class AuthedOrNotRequest[A](
+  val user: Option[User],
   request:  Request[A]
 ) extends WrappedRequest[A](request)
 
