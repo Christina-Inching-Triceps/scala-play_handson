@@ -13,7 +13,9 @@ import scala.concurrent.Future
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import slick.repositories.UserRepository
 import slick.models.User
-import mvc.AuthenticateHelpers
+import mvc.{AuthenticateHelpers, AuthedOrNotRequest, AuthenticateActionHelpers}
+import model.view.LoginViewModel
+import services.AuthenticateService
 
 case class LoginForm(
   email:           String,
@@ -23,11 +25,13 @@ case class LoginForm(
 @Singleton
 class LoginController @Inject() (
   val controllerComponents: ControllerComponents,
-  userRepository:           UserRepository
+  userRepository:           UserRepository,
+  authService:              AuthenticateService
 )(implicit ec:              ExecutionContext)
   extends BaseController
      with I18nSupport
-     with AuthenticateHelpers {
+     with AuthenticateHelpers
+     with AuthenticateActionHelpers {
 
   val loginForm = Form(
     mapping(
@@ -36,14 +40,18 @@ class LoginController @Inject() (
     )(LoginForm.apply)(LoginForm.unapply)
   )
 
-  def index() = Action { implicit request: Request[AnyContent] =>
-    Ok(views.html.login(loginForm))
+  def index() = AuthNOrNotAction(authService.authenticateOrNot) { implicit request: AuthedOrNotRequest[AnyContent] =>
+    Ok(views.html.login(
+      LoginViewModel.from(request.user, loginForm)
+    ))
   }
 
-  def login() = Action async { implicit request: Request[AnyContent] =>
+  def login() = AuthNOrNotAction(authService.authenticateOrNot) async { implicit request: AuthedOrNotRequest[AnyContent] =>
     loginForm.bindFromRequest().fold(
       formWithErrors => {
-        Future.successful(BadRequest(views.html.login(formWithErrors)))
+        Future.successful(BadRequest(views.html.login(
+          LoginViewModel.from(request.user, formWithErrors)
+        )))
       },
       form => {
         val bcryptEncoder   = new BCryptPasswordEncoder()
@@ -58,7 +66,10 @@ class LoginController @Inject() (
             case _ =>
               BadRequest(
                 views.html.login(
-                  loginForm.fill(form).withGlobalError("error.authenticate")
+                  LoginViewModel.from(
+                    request.user,
+                    loginForm.fill(form).withGlobalError("error.authenticate")
+                  )
                 )
               )
           }

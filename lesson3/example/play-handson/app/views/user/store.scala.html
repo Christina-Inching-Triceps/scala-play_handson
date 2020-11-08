@@ -1,7 +1,9 @@
-@import controllers.user.UserForm
-@(form: Form[UserForm])(implicit messagesProvider: MessagesProvider, requestHeader: RequestHeader)
+@import model.view.UserRegisterViewModel
 
-@main("ユーザ登録画面") {
+@(vm: UserRegisterViewModel)(implicit messagesProvider: MessagesProvider, requestHeader: RequestHeader)
+@form = @{vm.form}
+
+@main("ユーザ登録画面")(vm.headerViewModel) {
   <h1>ユーザ登録登録画面</h1>
   @helper.form(action = controllers.user.routes.UserController.store()) {
     @helper.CSRF.formField

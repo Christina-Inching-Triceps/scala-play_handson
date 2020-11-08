@@ -15,7 +15,8 @@ import scala.concurrent.Future
 import services.AuthenticateService
 import mvc.AuthenticateActionHelpers
 import mvc.AuthedRequest
-import model.view.TweetListViewModel
+import model.view.{TweetListViewModel, TweetEditViewModel, TweetShowViewModel, TweetRegisterViewModel}
+import model.view.HeaderViewModel
 
 case class TweetFormData(content: String)
 
@@ -73,8 +74,10 @@ class TweetController @Inject() (
       tweetOpt <- tweetRepository.findByIdAndUser(id, request.user.id.get)
     } yield {
       tweetOpt match {
-        case Some(tweet) => Ok(views.html.tweet.show(tweet))
-        case None        => NotFound(views.html.error.page404())
+        case Some(tweet) => Ok(views.html.tweet.show(
+          TweetShowViewModel.from(Some(request.user), tweet)
+        ))
+        case None        => NotFound(views.html.error.page404(HeaderViewModel.from(Some(request.user))))
       }
     }
   }
@@ -83,7 +86,12 @@ class TweetController @Inject() (
     * 登録画面の表示用
     */
   def register() = AuthNAction(authService.authenticate) { implicit request: AuthedRequest[AnyContent] =>
-    Ok(views.html.tweet.store(form))
+    Ok(views.html.tweet.store(
+      TweetRegisterViewModel.from(
+        Some(request.user),
+        form
+      )
+    ))
   }
 
   /**
@@ -95,7 +103,12 @@ class TweetController @Inject() (
       .bindFromRequest().fold(
         // 処理が失敗した場合に呼び出される関数
         (formWithErrors: Form[TweetFormData]) => {
-          Future.successful(BadRequest(views.html.tweet.store(formWithErrors)))
+          Future.successful(BadRequest(views.html.tweet.store(
+            TweetRegisterViewModel.from(
+              Some(request.user),
+              formWithErrors
+            )
+          )))
         },
         // 処理が成功した場合に呼び出される関数
         (tweetFormData: TweetFormData) => {
@@ -124,14 +137,15 @@ class TweetController @Inject() (
         case Some(tweet) =>
           Ok(
             views.html.tweet.edit(
-              // データを識別するためのidを渡す
-              id,
-              // fillでformに値を詰める
-              form.fill(TweetFormData(tweet.content))
+              TweetEditViewModel.from(
+                Some(request.user),
+                id, // データを識別するためのidを渡す
+                form.fill(TweetFormData(tweet.content)) // fillでformに値を詰める
+              )
             )
           )
         case None        =>
-          NotFound(views.html.error.page404())
+          NotFound(views.html.error.page404(HeaderViewModel.from(Some(request.user))))
       }
     }
   }
@@ -144,15 +158,23 @@ class TweetController @Inject() (
       .bindFromRequest().fold(
         (formWithErrors: Form[TweetFormData]) => {
           Future
-            .successful(BadRequest(views.html.tweet.edit(id, formWithErrors)))
+            .successful(BadRequest(views.html.tweet.edit(
+              TweetEditViewModel.from(
+                Some(request.user),
+                id,
+                formWithErrors
+              )
+            )))
         },
         (data: TweetFormData) => {
           for {
             count <- tweetRepository.updateContent(id, data.content)
           } yield {
             count match {
-              case 0 => NotFound(views.html.error.page404())
-              case _ => Redirect(routes.TweetController.list())
+              case 0 =>
+                NotFound(views.html.error.page404(HeaderViewModel.from(Some(request.user))))
+              case _ =>
+                Redirect(routes.TweetController.list())
             }
           }
         }
@@ -173,8 +195,10 @@ class TweetController @Inject() (
     } yield {
       // 削除対象の有無によって処理を分岐
       result match {
-        case 0 => NotFound(views.html.error.page404())
-        case _ => Redirect(routes.TweetController.list())
+        case 0 =>
+          NotFound(views.html.error.page404(HeaderViewModel.from(Some(request.user))))
+        case _ =>
+          Redirect(routes.TweetController.list())
       }
     }
   }

@@ -14,6 +14,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import slick.repositories.UserRepository
 import slick.models.User
 import mvc.AuthenticateHelpers
+import services.AuthenticateService
+import mvc.AuthenticateActionHelpers
+import mvc.AuthedOrNotRequest
+import model.view.UserRegisterViewModel
 
 case class UserForm(
   name:            String,
@@ -25,12 +29,14 @@ case class UserForm(
 @Singleton
 class UserController @Inject() (
   val controllerComponents: ControllerComponents,
-  userRepository:           UserRepository
+  userRepository:           UserRepository,
+  authService:              AuthenticateService
 )(implicit ec:              ExecutionContext)
   extends BaseController
      with I18nSupport
      // 認証後にsessionに持たせるidのKEYをとるためにwith
-     with AuthenticateHelpers {
+     with AuthenticateHelpers
+     with AuthenticateActionHelpers {
 
   val form = Form(
     mapping(
@@ -44,15 +50,19 @@ class UserController @Inject() (
     )
   )
 
-  def register() = Action { implicit request: Request[AnyContent] =>
-    Ok(views.html.user.store(form))
+  def register() = AuthNOrNotAction(authService.authenticateOrNot) { implicit request: AuthedOrNotRequest[AnyContent] =>
+    Ok(views.html.user.store(
+      UserRegisterViewModel.from(request.user, form)
+    ))
   }
 
-  def store() = Action async { implicit request: Request[AnyContent] =>
+  def store() = AuthNOrNotAction(authService.authenticateOrNot) async { implicit request: AuthedOrNotRequest[AnyContent] =>
     form
       .bindFromRequest().fold(
         (formWithErrors: Form[UserForm]) => {
-          Future.successful(BadRequest(views.html.user.store(formWithErrors)))
+          Future.successful(BadRequest(views.html.user.store(
+            UserRegisterViewModel.from(request.user, formWithErrors)
+          )))
         },
         (form: UserForm) => {
           val bcryptEncoder   = new BCryptPasswordEncoder()

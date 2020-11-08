@@ -1,10 +1,12 @@
 @import slick.models.Tweet
-@(tweet: Tweet)
+@import model.view.TweetShowViewModel
 
-@main("詳細画面") {
+@(vm: TweetShowViewModel)
+
+@main("詳細画面")(vm.headerViewModel) {
   <h1>詳細画面です</h1>
   <div id="detail">
-    <div>id: @tweet.id</div>
-    <div>content: @tweet.content</div>
+    <div>id: @vm.tweet.id</div>
+    <div>content: @vm.tweet.content</div>
   </div>
 }

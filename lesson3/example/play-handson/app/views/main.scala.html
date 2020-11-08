@@ -1,9 +1,12 @@
+@import model.view.HeaderViewModel
+
 @* js, cssを受け取れるように引数を追加。渡さなくてもいいようにデフォルト値も設定 *@
 @(
   title:  String,
   script: Html = Html(""),
   css:    Html = Html("")
-)(content: Html)
+)(vm: HeaderViewModel)(content: Html)
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -20,7 +23,8 @@
         @css
     </head>
     <body>
-        @content
+      @layout._header(vm)
+      @content
 
       <script src="@routes.Assets.versioned("javascripts/main.js")" type="text/javascript"></script>
       @* 引数の展開 *@

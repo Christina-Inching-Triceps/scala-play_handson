@@ -7,6 +7,7 @@ import play.api.mvc._
 import play.api.mvc.Results._
 import play.api.routing.Router
 import scala.concurrent._
+import model.view.HeaderViewModel
 
 /**
   * 参照: https://www.playframework.com/documentation/2.8.x/ScalaErrorHandling
@@ -21,7 +22,7 @@ class CustomErrorHandler @Inject() (
 
   override def onNotFound(request: RequestHeader, message: String): Future[Result] = {
     Future.successful(
-      NotFound(views.html.error.page404())
+      NotFound(views.html.error.page404(HeaderViewModel.from(None)))
     )
   }
 }
