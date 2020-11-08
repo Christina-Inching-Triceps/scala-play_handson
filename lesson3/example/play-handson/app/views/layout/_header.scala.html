@@ -1,18 +1,31 @@
 @import model.view.HeaderViewModel
+@import slick.models.User
 
 @(vm: HeaderViewModel)(implicit messagesProvider: MessagesProvider, requestHeader: RequestHeader)
 
-@loggedInHeader = @{
-<header>Logged In</header>
+@loggedInHeader(user: User) = {
+<header>
+  <h1>
+    Twitter Clone
+  </h1>
+  <a class="button" href="@routes.LogoutController.logout()">Logout</a>
+</header>
 }
 
 @commonHeader   = @{
-<header>Not Logged In</header>
+<header>
+  <h1>Twitter Clone</h1>
+</header>
 }
 
+@*
+==============================
+         Display HTML
+==============================
+*@
 @vm.loginUser match {
   case Some(user) => {
-    @loggedInHeader
+    @loggedInHeader(user)
   }
   case None       => {
     @commonHeader
