@@ -1,0 +1,20 @@
+@import model.view.LoginViewModel
+
+@(vm: LoginViewModel)(implicit messagesProvider: MessagesProvider, requestHeader: RequestHeader)
+@form = @{vm.form}
+
+@main("ログイン")(vm.headerViewModel) {
+  <h1>ログイン画面</h1>
+  @helper.form(action = routes.LoginController.login()) {
+    @if(!form.globalErrors.isEmpty) {
+      @for(error <- form.globalErrors){
+        <p>@error.format</p>
+      }
+    }
+
+    @helper.CSRF.formField
+    @helper.inputText(form("email"),                '_label -> "メールアドレス"   ,'_showConstraints -> false)
+    @helper.inputPassword(form("password"),         '_label -> "パスワード"       ,'_showConstraints -> false)
+    <input type="submit" value="ログイン">
+  }
+}

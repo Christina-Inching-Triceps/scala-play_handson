@@ -1,0 +1,29 @@
+body {
+  background-color: rgb(21, 32, 43);
+  color:            white;
+  font-family:      "Noto Sans Japanese", sans-serif;
+}
+
+header {
+  display:       flex;
+  margin:        0;
+  padding:       20px;
+  border-bottom: 1px solid rgb(56, 68, 77);
+}
+
+header > h1 {
+  margin: 0 auto 0 0;
+}
+
+/* https://webparts.cman.jp/button/a/ を流用 */
+.button {
+  border-radius  : 5%;          /* 角丸       */
+  cursor         : pointer;     /* カーソル   */
+  padding        : 12px 12px;   /* 余白       */
+  background     : #6666ff;     /* 背景色     */
+  color          : #ffffff;     /* 文字色     */
+  line-height    : 1em;         /* 1行の高さ  */
+  border         : 2px solid #6666ff;    /* 枠の指定 */
+  text-decoration: none;
+}
+

@@ -1,0 +1,18 @@
+@import model.view.TweetRegisterViewModel
+
+@* CSRFトークンの生成ヘルパーで、requestHeaderを必要としているのでこちらも暗黙パラメートして渡しています。 *@
+@(vm: TweetRegisterViewModel)(implicit messagesProvider: MessagesProvider, requestHeader: RequestHeader)
+@form = @{vm.form}
+
+@main("登録画面")(vm.headerViewModel) {
+  <h1>登録画面です</h1>
+  @helper.form(action = controllers.tweet.routes.TweetController.store()) {
+    @* CSRFトークンの生成ヘルパーを呼び出している。これでいい感じにトークンが用意されます。 *@
+    @helper.CSRF.formField
+    @helper.textarea(form("content"),
+      'rows -> 7, 'cols -> 40,
+      '_label -> "ツイート" ,'_showConstraints -> false
+    )
+    <input type="submit" value="登録">
+  }
+}
