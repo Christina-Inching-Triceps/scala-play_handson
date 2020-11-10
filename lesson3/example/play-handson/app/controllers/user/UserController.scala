@@ -18,13 +18,8 @@ import services.AuthenticateService
 import mvc.AuthenticateActionHelpers
 import mvc.AuthedOrNotRequest
 import model.view.UserRegisterViewModel
-
-case class UserForm(
-  name:            String,
-  email:           String,
-  password:        String,
-  confirmPassword: String
-)
+import model.form.UserForm
+import model.form.SignUp
 
 @Singleton
 class UserController @Inject() (
@@ -38,33 +33,21 @@ class UserController @Inject() (
      with AuthenticateHelpers
      with AuthenticateActionHelpers {
 
-  val form = Form(
-    mapping(
-      "name"             -> nonEmptyText(maxLength = 255),
-      "email"            -> nonEmptyText(maxLength = 255),
-      "password"         -> nonEmptyText(minLength = 8, maxLength = 72),
-      "confirm_password" -> nonEmptyText
-    )(UserForm.apply)(UserForm.unapply).verifying(
-      "error.passwordDisagreement",
-      v => v.password == v.confirmPassword
-    )
-  )
-
   def register() = AuthNOrNotAction(authService.authenticateOrNot) { implicit request: AuthedOrNotRequest[AnyContent] =>
     Ok(views.html.user.store(
-      UserRegisterViewModel.from(request.user, form)
+      UserRegisterViewModel.from(request.user, UserForm.signUpForm)
     ))
   }
 
   def store() = AuthNOrNotAction(authService.authenticateOrNot) async { implicit request: AuthedOrNotRequest[AnyContent] =>
-    form
+    UserForm.signUpForm
       .bindFromRequest().fold(
-        (formWithErrors: Form[UserForm]) => {
+        (formWithErrors: Form[SignUp]) => {
           Future.successful(BadRequest(views.html.user.store(
             UserRegisterViewModel.from(request.user, formWithErrors)
           )))
         },
-        (form: UserForm) => {
+        (form: SignUp) => {
           val bcryptEncoder   = new BCryptPasswordEncoder()
           val encodedPassowrd = bcryptEncoder.encode(form.password)
           for {

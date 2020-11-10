@@ -15,12 +15,8 @@ import slick.repositories.UserRepository
 import slick.models.User
 import mvc.{AuthenticateHelpers, AuthedOrNotRequest, AuthenticateActionHelpers}
 import model.view.LoginViewModel
+import model.form._
 import services.AuthenticateService
-
-case class LoginForm(
-  email:           String,
-  password:        String
-)
 
 @Singleton
 class LoginController @Inject() (
@@ -33,21 +29,14 @@ class LoginController @Inject() (
      with AuthenticateHelpers
      with AuthenticateActionHelpers {
 
-  val loginForm = Form(
-    mapping(
-      "email"            -> nonEmptyText(maxLength = 255),
-      "password"         -> nonEmptyText(minLength = 8, maxLength = 72)
-    )(LoginForm.apply)(LoginForm.unapply)
-  )
-
   def index() = AuthNOrNotAction(authService.authenticateOrNot) { implicit request: AuthedOrNotRequest[AnyContent] =>
     Ok(views.html.login(
-      LoginViewModel.from(request.user, loginForm)
+      LoginViewModel.from(request.user, LoginForm.form)
     ))
   }
 
   def login() = AuthNOrNotAction(authService.authenticateOrNot) async { implicit request: AuthedOrNotRequest[AnyContent] =>
-    loginForm.bindFromRequest().fold(
+    LoginForm.form.bindFromRequest().fold(
       formWithErrors => {
         Future.successful(BadRequest(views.html.login(
           LoginViewModel.from(request.user, formWithErrors)
@@ -68,7 +57,7 @@ class LoginController @Inject() (
                 views.html.login(
                   LoginViewModel.from(
                     request.user,
-                    loginForm.fill(form).withGlobalError("error.authenticate")
+                    LoginForm.form.fill(form).withGlobalError("error.authenticate")
                   )
                 )
               )

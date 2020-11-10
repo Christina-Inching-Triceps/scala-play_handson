@@ -17,8 +17,7 @@ import mvc.AuthenticateActionHelpers
 import mvc.AuthedRequest
 import model.view.{TweetListViewModel, TweetEditViewModel, TweetShowViewModel, TweetRegisterViewModel}
 import model.view.HeaderViewModel
-
-case class TweetFormData(content: String)
+import model.form._
 
 /**
   * @SingletonでPlayFrameworkの管理下でSingletonオブジェクトとして本クラスを扱う指定をする
@@ -38,14 +37,6 @@ class TweetController @Inject() (
   extends BaseController
      with I18nSupport
      with AuthenticateActionHelpers {
-
-  // Tweet登録用のFormオブジェクト
-  val form = Form(
-    // html formのnameがcontentのものを140文字以下の必須文字列に設定する
-    mapping(
-      "content" -> nonEmptyText(maxLength = 140)
-    )(TweetFormData.apply)(TweetFormData.unapply)
-  )
 
   /**
     * Tweetを一覧表示
@@ -89,7 +80,7 @@ class TweetController @Inject() (
     Ok(views.html.tweet.store(
       TweetRegisterViewModel.from(
         Some(request.user),
-        form
+        TweetForm.tweetContentForm
       )
     ))
   }
@@ -99,10 +90,10 @@ class TweetController @Inject() (
     */
   def store() = AuthNAction(authService.authenticate) async { implicit request: AuthedRequest[AnyContent] =>
     // foldでデータ受け取りの成功、失敗を分岐しつつ処理が行える
-    form
+    TweetForm.tweetContentForm
       .bindFromRequest().fold(
         // 処理が失敗した場合に呼び出される関数
-        (formWithErrors: Form[TweetFormData]) => {
+        (formWithErrors: Form[TweetContent]) => {
           Future.successful(BadRequest(views.html.tweet.store(
             TweetRegisterViewModel.from(
               Some(request.user),
@@ -111,7 +102,7 @@ class TweetController @Inject() (
           )))
         },
         // 処理が成功した場合に呼び出される関数
-        (tweetFormData: TweetFormData) => {
+        (tweetFormData: TweetContent) => {
           for {
             // データを登録。returnのidは不要なので捨てる
             _ <- tweetRepository.insert(Tweet(
@@ -140,7 +131,7 @@ class TweetController @Inject() (
               TweetEditViewModel.from(
                 Some(request.user),
                 id, // データを識別するためのidを渡す
-                form.fill(TweetFormData(tweet.content)) // fillでformに値を詰める
+                TweetForm.tweetContentForm.fill(TweetContent(tweet.content)) // fillでformに値を詰める
               )
             )
           )
@@ -154,9 +145,9 @@ class TweetController @Inject() (
     * 対象のツイートを更新する
     */
   def update(id: Long) = AuthNAction(authService.authenticate) async { implicit request: AuthedRequest[AnyContent] =>
-    form
+    TweetForm.tweetContentForm
       .bindFromRequest().fold(
-        (formWithErrors: Form[TweetFormData]) => {
+        (formWithErrors: Form[TweetContent]) => {
           Future
             .successful(BadRequest(views.html.tweet.edit(
               TweetEditViewModel.from(
@@ -166,7 +157,7 @@ class TweetController @Inject() (
               )
             )))
         },
-        (data: TweetFormData) => {
+        (data: TweetContent) => {
           for {
             count <- tweetRepository.updateContent(id, data.content)
           } yield {

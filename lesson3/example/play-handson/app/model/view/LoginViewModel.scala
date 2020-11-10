@@ -2,7 +2,7 @@ package model.view
 
 import model.view.HeaderViewModel
 import play.api.data.Form
-import controllers.LoginForm
+import model.form.LoginForm
 import slick.models.User
 
 case class LoginViewModel(
