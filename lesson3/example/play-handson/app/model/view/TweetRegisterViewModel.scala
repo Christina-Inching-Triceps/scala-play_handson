@@ -1,19 +1,19 @@
 package model.view
 
-import model.view.HeaderViewModel
+import model.view.layout.LayoutViewModel
 import slick.models.{Tweet,User}
 import play.api.data.Form
 import model.form.TweetContent
 
 case class TweetRegisterViewModel(
-  headerViewModel: HeaderViewModel,
-  form:            Form[TweetContent]
+  layout: LayoutViewModel,
+  form:   Form[TweetContent]
 )
 
 object TweetRegisterViewModel {
-  def from(userOpt: Option[User], form: Form[TweetContent]): TweetRegisterViewModel =
+  def from(layout: LayoutViewModel, form: Form[TweetContent]): TweetRegisterViewModel =
     TweetRegisterViewModel(
-      HeaderViewModel.from(userOpt),
+      layout,
       form
     )
 }

@@ -1,4 +1,4 @@
-package model.view
+package model.view.layout
 
 import slick.models.User
 

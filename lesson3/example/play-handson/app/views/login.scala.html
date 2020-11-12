@@ -3,7 +3,7 @@
 @(vm: LoginViewModel)(implicit messagesProvider: MessagesProvider, requestHeader: RequestHeader)
 @form = @{vm.form}
 
-@main("ログイン")(vm.headerViewModel) {
+@main("ログイン")(vm.layout) {
   <h1>ログイン画面</h1>
   @helper.form(action = routes.LoginController.login()) {
     @if(!form.globalErrors.isEmpty) {

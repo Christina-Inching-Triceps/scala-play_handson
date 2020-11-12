@@ -18,6 +18,7 @@ import services.AuthenticateService
 import mvc.AuthenticateActionHelpers
 import mvc.AuthedOrNotRequest
 import model.view.UserRegisterViewModel
+import model.view.layout.LayoutViewModel
 import model.form.UserForm
 import model.form.SignUp
 
@@ -35,7 +36,10 @@ class UserController @Inject() (
 
   def register() = AuthNOrNotAction(authService.authenticate) { implicit request: AuthedOrNotRequest[AnyContent] =>
     Ok(views.html.user.store(
-      UserRegisterViewModel.from(request.user, UserForm.signUpForm)
+      UserRegisterViewModel.from(
+        layout = LayoutViewModel.from(request.user),
+        form   = UserForm.signUpForm
+      )
     ))
   }
 
@@ -44,7 +48,10 @@ class UserController @Inject() (
       .bindFromRequest().fold(
         (formWithErrors: Form[SignUp]) => {
           Future.successful(BadRequest(views.html.user.store(
-            UserRegisterViewModel.from(request.user, formWithErrors)
+            UserRegisterViewModel.from(
+              layout = LayoutViewModel.from(request.user),
+              form   = formWithErrors
+            )
           )))
         },
         (form: SignUp) => {

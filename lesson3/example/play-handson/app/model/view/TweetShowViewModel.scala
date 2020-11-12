@@ -1,17 +1,17 @@
 package model.view
 
-import model.view.HeaderViewModel
+import model.view.layout.LayoutViewModel
 import slick.models.{Tweet,User}
 
 case class TweetShowViewModel(
-  headerViewModel: HeaderViewModel,
-  tweet:           Tweet
+  layout: LayoutViewModel,
+  tweet:  Tweet
 )
 
 object TweetShowViewModel {
-  def from(userOpt: Option[User], tweet: Tweet): TweetShowViewModel =
+  def from(layout: LayoutViewModel, tweet: Tweet): TweetShowViewModel =
     TweetShowViewModel(
-      HeaderViewModel.from(userOpt),
+      layout,
       tweet
     )
 }

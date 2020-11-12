@@ -1,11 +1,11 @@
-@import model.view.HeaderViewModel
+@import model.view.layout.LayoutViewModel
 
 @* js, cssを受け取れるように引数を追加。渡さなくてもいいようにデフォルト値も設定 *@
 @(
   title:  String,
   script: Html = Html(""),
   css:    Html = Html("")
-)(vm: HeaderViewModel)(content: Html)
+)(vm: LayoutViewModel)(content: Html)
 
 
 <!DOCTYPE html>
@@ -23,7 +23,7 @@
         @css
     </head>
     <body>
-      @layout._header(vm)
+      @layout._header(vm.header)
       @content
 
       <script src="@routes.Assets.versioned("javascripts/main.js")" type="text/javascript"></script>

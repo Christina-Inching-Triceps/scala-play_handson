@@ -15,6 +15,7 @@ import slick.repositories.UserRepository
 import slick.models.User
 import mvc.{AuthenticateHelpers, AuthedOrNotRequest, AuthenticateActionHelpers}
 import model.view.LoginViewModel
+import model.view.layout.LayoutViewModel
 import model.form._
 import services.AuthenticateService
 
@@ -31,7 +32,10 @@ class LoginController @Inject() (
 
   def index() = AuthNOrNotAction(authService.authenticate) { implicit request: AuthedOrNotRequest[AnyContent] =>
     Ok(views.html.login(
-      LoginViewModel.from(request.user, LoginForm.form)
+      LoginViewModel.from(
+        layout = LayoutViewModel.from(request.user),
+        form   = LoginForm.form
+      )
     ))
   }
 
@@ -39,7 +43,10 @@ class LoginController @Inject() (
     LoginForm.form.bindFromRequest().fold(
       formWithErrors => {
         Future.successful(BadRequest(views.html.login(
-          LoginViewModel.from(request.user, formWithErrors)
+          LoginViewModel.from(
+            layout = LayoutViewModel.from(request.user),
+            form   = formWithErrors
+          )
         )))
       },
       form => {
@@ -56,8 +63,8 @@ class LoginController @Inject() (
               BadRequest(
                 views.html.login(
                   LoginViewModel.from(
-                    request.user,
-                    LoginForm.form.fill(form).withGlobalError("error.authenticate")
+                    layout = LayoutViewModel.from(request.user),
+                    form   = LoginForm.form.fill(form).withGlobalError("error.authenticate")
                   )
                 )
               )

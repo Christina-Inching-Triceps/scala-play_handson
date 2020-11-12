@@ -7,7 +7,7 @@ import play.api.mvc._
 import play.api.mvc.Results._
 import play.api.routing.Router
 import scala.concurrent._
-import model.view.HeaderViewModel
+import model.view.layout.LayoutViewModel
 import services.AuthenticateService
 
 /**
@@ -27,9 +27,9 @@ class CustomErrorHandler @Inject() (
     authService.authenticate(request) map {
       _ match {
         case Right(user) =>
-          NotFound(views.html.error.page404(HeaderViewModel.from(Some(user))))
+          NotFound(views.html.error.page404(LayoutViewModel.from(Some(user))))
         case Left(_)     =>
-          NotFound(views.html.error.page404(HeaderViewModel.from(None)))
+          NotFound(views.html.error.page404(LayoutViewModel.from(None)))
       }
     }
   }

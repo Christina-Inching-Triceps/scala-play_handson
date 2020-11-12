@@ -1,19 +1,19 @@
 package model.view
 
-import model.view.HeaderViewModel
+import model.view.layout.LayoutViewModel
 import play.api.data.Form
 import model.form.LoginForm
 import slick.models.User
 
 case class LoginViewModel(
-  headerViewModel: HeaderViewModel,
-  form:            Form[LoginForm]
+  layout: LayoutViewModel,
+  form:   Form[LoginForm]
 )
 
 object LoginViewModel {
-  def from(userOpt: Option[User], form: Form[LoginForm]): LoginViewModel =
+  def from(layout: LayoutViewModel, form: Form[LoginForm]): LoginViewModel =
     LoginViewModel(
-      HeaderViewModel.from(userOpt),
+      layout,
       form
     )
 }

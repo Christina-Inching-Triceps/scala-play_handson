@@ -3,7 +3,7 @@
 
 @(vm: TweetShowViewModel)
 
-@main("詳細画面")(vm.headerViewModel) {
+@main("詳細画面")(vm.layout) {
   <h1>詳細画面です</h1>
   <div id="detail">
     <div>id: @vm.tweet.id</div>
