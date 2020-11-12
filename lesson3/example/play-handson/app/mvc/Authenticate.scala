@@ -19,7 +19,7 @@ trait AuthenticateActionHelpers {
     AuthenticateActionBuilder(authenticate, parse.default)(defaultExecutionContext)
   }
 
-  def AuthNOrNotAction(authenticateOrNot: RequestHeader => Future[Option[User]]) = {
+  def AuthNOrNotAction(authenticateOrNot: RequestHeader => Future[Either[Result, User]]) = {
     AuthenticateOrNotActionBuilder(authenticateOrNot, parse.default)(defaultExecutionContext)
   }
 }

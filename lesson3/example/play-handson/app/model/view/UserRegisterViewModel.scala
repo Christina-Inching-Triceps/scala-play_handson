@@ -1,19 +1,19 @@
 package model.view
 
-import model.view.HeaderViewModel
+import model.view.layout.LayoutViewModel
 import play.api.data.Form
 import slick.models.User
 import model.form._
 
 case class UserRegisterViewModel(
-  headerViewModel: HeaderViewModel,
-  form:            Form[SignUp]
+  layout: LayoutViewModel,
+  form:   Form[SignUp]
 )
 
 object UserRegisterViewModel {
-  def from(userOpt: Option[User], form: Form[SignUp]): UserRegisterViewModel =
+  def from(layout: LayoutViewModel, form: Form[SignUp]): UserRegisterViewModel =
     UserRegisterViewModel(
-      HeaderViewModel.from(userOpt),
+      layout,
       form
     )
 }

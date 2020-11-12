@@ -25,9 +25,7 @@
   title  = "一覧画面",
   script = script,
   css    = css
-)(
-  vm.headerViewModel
-) {
+)(vm.layout) {
   @for(tweet <- vm.tweets) {
     @* cardクリック時の遷移先を保持するためにdata-href属性を作成して設定  *@
     <div class="card" data-href="@controllers.tweet.routes.TweetController.show(tweet.id.getOrElse(0))">

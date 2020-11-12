@@ -3,7 +3,7 @@
 @(vm: UserRegisterViewModel)(implicit messagesProvider: MessagesProvider, requestHeader: RequestHeader)
 @form = @{vm.form}
 
-@main("ユーザ登録画面")(vm.headerViewModel) {
+@main("ユーザ登録画面")(vm.layout) {
   <h1>ユーザ登録登録画面</h1>
   @helper.form(action = controllers.user.routes.UserController.store()) {
     @helper.CSRF.formField

@@ -27,7 +27,7 @@ with    AuthenticateActionHelpers {
    * will be called when the application receives a `GET` request with
    * a path of `/`.
    */
-  def index() = AuthNOrNotAction(authService.authenticateOrNot) { implicit request: AuthedOrNotRequest[AnyContent] =>
+  def index() = AuthNOrNotAction(authService.authenticate) { implicit request: AuthedOrNotRequest[AnyContent] =>
     request.user match {
       case Some(user) =>
         Redirect(tweet.routes.TweetController.list())

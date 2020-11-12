@@ -17,3 +17,36 @@
 
 現状各Actionごとにデータセットアップが必要
 headerのデータが変更されると全Actionで更新作業が必要になるため、あまりいい設計じゃないと思う
+
+
+## modelイメージ
+
+case class TweetContentViewModel(
+  displayName: String,
+  accountId:   String,
+  postedAt:    LocalDate,
+  content:     String,
+  media:       Seq[Media],
+  tags:        Seq[Tag],
+)
+
+case class TweetViewModel(
+  content: TweetContentViewModel,
+  menu: TweetMenuViewModel,
+  
+)
+
+case class ProfileTweetMenuViewModel() extends TweetMenuViewModel
+case class HomeTweetMenuViewModel() extends TweetMenuViewModel
+case class DefaultTweetMenuViewModel() extends TweetMenuViewModel
+trait TweetMenuViewModel {
+  def items: Seq[MenuItemViewModel]
+}
+
+case class MenuItemViewModel(
+  icon:  URL,
+  titel: String,
+  link:  Caller,
+  method: HttpMethod,
+  params: Map[String, String]
+)

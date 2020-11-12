@@ -16,7 +16,7 @@ import services.AuthenticateService
 import mvc.AuthenticateActionHelpers
 import mvc.AuthedRequest
 import model.view.{TweetListViewModel, TweetEditViewModel, TweetShowViewModel, TweetRegisterViewModel}
-import model.view.HeaderViewModel
+import model.view.layout.LayoutViewModel
 import model.form._
 
 /**
@@ -49,8 +49,8 @@ class TweetController @Inject() (
       tweets <- tweetRepository.selectByUser(request.user.id.get)
     } yield {
       val viewModel = TweetListViewModel.from(
-        userOpt = Some(request.user),
-        tweets  = tweets
+        layout = LayoutViewModel.from(Some(request.user)),
+        tweets = tweets
       )
       Ok(views.html.tweet.list(viewModel))
     }
@@ -66,9 +66,12 @@ class TweetController @Inject() (
     } yield {
       tweetOpt match {
         case Some(tweet) => Ok(views.html.tweet.show(
-          TweetShowViewModel.from(Some(request.user), tweet)
+          TweetShowViewModel.from(
+            layout = LayoutViewModel.from(Some(request.user)),
+            tweet  = tweet
+          )
         ))
-        case None        => NotFound(views.html.error.page404(HeaderViewModel.from(Some(request.user))))
+        case None        => NotFound(views.html.error.page404(LayoutViewModel.from(Some(request.user))))
       }
     }
   }
@@ -79,8 +82,8 @@ class TweetController @Inject() (
   def register() = AuthNAction(authService.authenticate) { implicit request: AuthedRequest[AnyContent] =>
     Ok(views.html.tweet.store(
       TweetRegisterViewModel.from(
-        Some(request.user),
-        TweetForm.tweetContentForm
+        layout = LayoutViewModel.from(Some(request.user)),
+        form   = TweetForm.tweetContentForm
       )
     ))
   }
@@ -96,8 +99,8 @@ class TweetController @Inject() (
         (formWithErrors: Form[TweetContent]) => {
           Future.successful(BadRequest(views.html.tweet.store(
             TweetRegisterViewModel.from(
-              Some(request.user),
-              formWithErrors
+              layout = LayoutViewModel.from(Some(request.user)),
+              form   = formWithErrors
             )
           )))
         },
@@ -129,14 +132,14 @@ class TweetController @Inject() (
           Ok(
             views.html.tweet.edit(
               TweetEditViewModel.from(
-                Some(request.user),
-                id, // データを識別するためのidを渡す
-                TweetForm.tweetContentForm.fill(TweetContent(tweet.content)) // fillでformに値を詰める
+                layout = LayoutViewModel.from(Some(request.user)),
+                id     = id, // データを識別するためのidを渡す
+                form   = TweetForm.tweetContentForm.fill(TweetContent(tweet.content)) // fillでformに値を詰める
               )
             )
           )
         case None        =>
-          NotFound(views.html.error.page404(HeaderViewModel.from(Some(request.user))))
+          NotFound(views.html.error.page404(LayoutViewModel.from(Some(request.user))))
       }
     }
   }
@@ -151,9 +154,9 @@ class TweetController @Inject() (
           Future
             .successful(BadRequest(views.html.tweet.edit(
               TweetEditViewModel.from(
-                Some(request.user),
-                id,
-                formWithErrors
+                layout = LayoutViewModel.from(Some(request.user)),
+                id     = id,
+                form   = formWithErrors
               )
             )))
         },
@@ -163,7 +166,7 @@ class TweetController @Inject() (
           } yield {
             count match {
               case 0 =>
-                NotFound(views.html.error.page404(HeaderViewModel.from(Some(request.user))))
+                NotFound(views.html.error.page404(LayoutViewModel.from(Some(request.user))))
               case _ =>
                 Redirect(routes.TweetController.list())
             }
@@ -187,7 +190,7 @@ class TweetController @Inject() (
       // 削除対象の有無によって処理を分岐
       result match {
         case 0 =>
-          NotFound(views.html.error.page404(HeaderViewModel.from(Some(request.user))))
+          NotFound(views.html.error.page404(LayoutViewModel.from(Some(request.user))))
         case _ =>
           Redirect(routes.TweetController.list())
       }
