@@ -33,13 +33,13 @@ class UserController @Inject() (
      with AuthenticateHelpers
      with AuthenticateActionHelpers {
 
-  def register() = AuthNOrNotAction(authService.authenticateOrNot) { implicit request: AuthedOrNotRequest[AnyContent] =>
+  def register() = AuthNOrNotAction(authService.authenticate) { implicit request: AuthedOrNotRequest[AnyContent] =>
     Ok(views.html.user.store(
       UserRegisterViewModel.from(request.user, UserForm.signUpForm)
     ))
   }
 
-  def store() = AuthNOrNotAction(authService.authenticateOrNot) async { implicit request: AuthedOrNotRequest[AnyContent] =>
+  def store() = AuthNOrNotAction(authService.authenticate) async { implicit request: AuthedOrNotRequest[AnyContent] =>
     UserForm.signUpForm
       .bindFromRequest().fold(
         (formWithErrors: Form[SignUp]) => {

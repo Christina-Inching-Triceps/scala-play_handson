@@ -24,8 +24,13 @@ class CustomErrorHandler @Inject() (
   extends DefaultHttpErrorHandler(env, config, sourceMapper, router) {
 
   override def onNotFound(request: RequestHeader, message: String): Future[Result] = {
-    authService.authenticateOrNot(request) map { userOpt =>
-      NotFound(views.html.error.page404(HeaderViewModel.from(userOpt)))
+    authService.authenticate(request) map {
+      _ match {
+        case Right(user) =>
+          NotFound(views.html.error.page404(HeaderViewModel.from(Some(user))))
+        case Left(_)     =>
+          NotFound(views.html.error.page404(HeaderViewModel.from(None)))
+      }
     }
   }
 }

@@ -85,13 +85,13 @@ class AuthenticateActionBuilderImpl (
 trait  AuthenticateOrNotActionBuilder extends ActionBuilder[AuthedOrNotRequest, AnyContent]
 object AuthenticateOrNotActionBuilder {
   def apply(
-    authenticateOrNot: RequestHeader => Future[Option[User]],
-    parser:            BodyParser[AnyContent]
-  )(implicit ec: ExecutionContext) = new AuthenticateOrNotActionBuilderImpl(authenticateOrNot, parser)
+    authenticate: RequestHeader => Future[Either[Result, User]],
+    parser:       BodyParser[AnyContent]
+  )(implicit ec: ExecutionContext) = new AuthenticateOrNotActionBuilderImpl(authenticate, parser)
 }
 
 class AuthenticateOrNotActionBuilderImpl (
-  val authenticateOrNot: RequestHeader => Future[Option[User]],
+  val authenticate: RequestHeader => Future[Either[Result, User]],
   val parser:       BodyParser[AnyContent]
 )(implicit ec: ExecutionContext)
   extends AuthenticateOrNotActionBuilder
@@ -102,8 +102,13 @@ class AuthenticateOrNotActionBuilderImpl (
   def invokeBlock[A](
     request: Request[A],
     block:   AuthedOrNotRequest[A] => Future[Result]
-  ): Future[Result] = authenticateOrNot(request) flatMap { userOpt =>
-    block(new AuthedOrNotRequest(userOpt, request))
+  ): Future[Result] = authenticate(request) flatMap {
+    _ match {
+      case Right(user) =>
+        block(new AuthedOrNotRequest(Some(user), request))
+      case Left(_)     =>
+        block(new AuthedOrNotRequest(None, request))
+    }
   }
 }
 

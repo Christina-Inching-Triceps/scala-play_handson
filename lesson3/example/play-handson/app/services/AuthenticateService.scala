@@ -37,19 +37,4 @@ class AuthenticateService @Inject() (
         Future.successful(Left(Redirect("/login")))
     }
   }
-
-  /**
-    * 認証状態に合わせてOption[User]を返す
-    */
-  def authenticateOrNot(request: RequestHeader)(implicit ec: ExecutionContext): Future[Option[User]] = {
-    request.session.get(SESSION_ID) match {
-      case Some(sid) if Try(sid.toLong).isSuccess =>
-        for {
-          userOpt <- userRepository.findById(sid.toLong)
-        } yield userOpt
-      case _      =>
-        Future.successful(None)
-    }
-  }
-
 }

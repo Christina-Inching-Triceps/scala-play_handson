@@ -29,13 +29,13 @@ class LoginController @Inject() (
      with AuthenticateHelpers
      with AuthenticateActionHelpers {
 
-  def index() = AuthNOrNotAction(authService.authenticateOrNot) { implicit request: AuthedOrNotRequest[AnyContent] =>
+  def index() = AuthNOrNotAction(authService.authenticate) { implicit request: AuthedOrNotRequest[AnyContent] =>
     Ok(views.html.login(
       LoginViewModel.from(request.user, LoginForm.form)
     ))
   }
 
-  def login() = AuthNOrNotAction(authService.authenticateOrNot) async { implicit request: AuthedOrNotRequest[AnyContent] =>
+  def login() = AuthNOrNotAction(authService.authenticate) async { implicit request: AuthedOrNotRequest[AnyContent] =>
     LoginForm.form.bindFromRequest().fold(
       formWithErrors => {
         Future.successful(BadRequest(views.html.login(
